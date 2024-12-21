@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>day-to-day life update</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #fff5f7;
+            color: #5a3c3c;
+        }
+        header {
+            background-color: #ff758f;
+            color: white;
+            text-align: center;
+            padding: 1.5rem 0;
+            position: relative;
+        }
+        header h1 {
+            margin: 0;
+            font-size: 2.5rem;
+        }
+        header::after {
+            content: '❤️';
+            font-size: 3rem;
+            position: absolute;
+            top: 50%;
+            right: 1rem;
+            transform: translateY(-50%);
+        }
+        nav {
+            display: flex;
+            justify-content: center;
+            background-color: #ffc1cc;
+            padding: 10px 0;
+        }
+        nav a {
+            color: white;
+            text-decoration: none;
+            margin: 0 15px;
+            padding: 10px;
+            border-radius: 20px;
+            font-size: 1rem;
+        }
+        nav a.active {
+            background-color: #ff758f;
+        }
+        nav a:hover {
+            background-color: #ff99aa;
+        }
+        main {
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .section {
+            display: none;
+        }
+        .section.active {
+            display: block;
+        }
+        .entry-preview {
+            background-color: #fff;
+            border: 1px solid #ffd7e0;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            padding: 15px;
+            box-shadow: 0 2px 8px rgba(255, 117, 143, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .entry-preview img {
+            max-width: 100px;
+            height: auto;
+            border-radius: 5px;
+        }
+        .entry-preview textarea {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ffd7e0;
+            border-radius: 10px;
+            resize: none;
+            background-color: #ffeef3;
+        }
+        .folder {
+            margin-bottom: 30px;
+            padding: 20px;
+            border-radius: 20px;
+            background-color: white;
+            box-shadow: 0 2px 8px rgba(255, 117, 143, 0.2);
+            border: 2px dashed #ffc1cc;
+        }
+        .folder h3 {
+            background-color: #ffeef3;
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            text-align: center;
+            font-style: italic;
+        }
+        footer {
+            text-align: center;
+            margin-top: 20px;
+            padding: 10px;
+            font-size: 0.9rem;
+            color: #5a3c3c;
+        }
+        footer a {
+            color: #ff758f;
+            text-decoration: none;
+        }
+        footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Our Logbook</h1>
+        <h4>Ini terinspirasi dari ngerjian laporan mangang lu, so keep me updated through this okay?</4>
+    </header>
+    <nav>
+        <a href="#section-aku" class="active" data-section="aku">Adik's</a>
+        <a href="#section-dia" data-section="dia">B's</a>
+    </nav>
+    <main>
+        <!-- Section Aku -->
+        <div id="section-aku" class="section active">
+            <h2>Ada pap apa aja hari ini adik?</h2>
+            <input type="file" id="uploadAku" accept="image/*" multiple>
+            <div id="previewAku" class="preview-area"></div>
+            <button id="submitAku">Submit</button>
+        </div>
+
+        <!-- Section Dia -->
+        <div id="section-dia" class="section">
+            <h2>B's</h2>
+            <input type="file" id="uploadDia" accept="image/*" multiple>
+            <div id="previewDia" class="preview-area"></div>
+            <button id="submitDia">Submit</button>
+        </div>
+    </main>
+    <footer>
+        Made for you A <span>❤️</span> by <a href="https://open.spotify.com/user/317qwkitxaqjkljenhhkuyegcdtq?si=6520b24ed8fc45ef">your polisi skripsi</a>
+    </footer>
+    <script>
+        function getTodayDate() {
+            const date = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            return date.toLocaleDateString('id-ID', options);
+        }
+
+        function setupUpload(inputId, previewId, submitId) {
+            const input = document.getElementById(inputId);
+            const preview = document.getElementById(previewId);
+            const submitButton = document.getElementById(submitId);
+
+            input.addEventListener('change', function() {
+                preview.innerHTML = '';
+                const files = Array.from(this.files);
+
+                files.forEach(file => {
+                    const reader = new FileReader();
+
+                    reader.onload = function(e) {
+                        const entryPreview = document.createElement('div');
+                        entryPreview.className = 'entry-preview';
+
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+
+                        const description = document.createElement('textarea');
+                        description.rows = 3;
+                        description.placeholder = "Tulis deskripsi untuk foto ini...";
+
+                        entryPreview.appendChild(img);
+                        entryPreview.appendChild(description);
+
+                        preview.appendChild(entryPreview);
+                    };
+
+                    reader.readAsDataURL(file);
+                });
+            });
+
+            submitButton.addEventListener('click', function() {
+                const today = getTodayDate();
+                let folder = document.querySelector(`[data-date="${today}"]`);
+
+                if (!folder) {
+                    folder = document.createElement('div');
+                    folder.className = 'folder';
+                    folder.setAttribute('data-date', today);
+
+                    const folderHeader = document.createElement('h3');
+                    folderHeader.textContent = `Log Harian - ${today}`;
+                    folder.appendChild(folderHeader);
+
+                    document.querySelector('main').appendChild(folder);
+                }
+
+                const previews = preview.querySelectorAll('.entry-preview');
+                let isComplete = true;
+
+                previews.forEach(previewItem => {
+                    const img = previewItem.querySelector('img');
+                    const description = previewItem.querySelector('textarea');
+
+                    if (!description.value.trim()) {
+                        isComplete = false;
+                        alert("Isi semua deskripsi dulu sebelum submit!");
+                        return;
+                    }
+
+                    const entry = document.createElement('div');
+                    entry.className = 'entry';
+
+                    const imgClone = img.cloneNode(true);
+                    const descClone = document.createElement('p');
+                    descClone.textContent = description.value;
+
+                    entry.appendChild(imgClone);
+                    entry.appendChild(descClone);
+
+                    folder.appendChild(entry);
+                });
+
+                if (isComplete) {
+                    preview.innerHTML = '';
+                    input.value = '';
+                }
+            });
+        }
+
+        function setupNavigation() {
+            const navLinks = document.querySelectorAll('nav a');
+            navLinks.forEach(link => {
+                link.addEventListener('click', function(event) {
+                    event.preventDefault();
+                    const targetSection = this.getAttribute('data-section');
+
+                    document.querySelectorAll('.section').forEach(section => {
+                        section.classList.remove('active');
+                    });
+
+                    document.getElementById(`section-${targetSection}`).classList.add('active');
+
+                    navLinks.forEach(nav => nav.classList.remove('active'));
+                    this.classList.add('active');
+                });
+            });
+        }
+
+        setupUpload('uploadAku', 'previewAku', 'submitAku');
+        setupUpload('uploadDia', 'previewDia', 'submitDia');
+        setupNavigation();
+    </script>
+</body>
+</html>
